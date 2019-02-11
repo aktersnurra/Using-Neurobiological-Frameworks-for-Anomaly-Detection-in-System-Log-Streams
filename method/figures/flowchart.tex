@@ -1,0 +1,29 @@
+\begin{tikzpicture}
+[node distance = 1cm, auto,font=\footnotesize,
+% STYLES
+every node/.style={node distance=3cm},
+% The comment style is used to describe the characteristics of each force
+comment/.style={inner sep= 5pt, text width=4cm, node distance=0.25cm, font=\scriptsize\sffamily},
+% The force style is used to draw the forces' name
+force/.style={rectangle, draw, fill=black!25, inner sep=5pt, text width=4cm, text badly centered, minimum height=1.2cm, font=\bfseries\footnotesize\sffamily}] 
+
+% Draw forces
+\node [force] (input) {Preprocessed\\System Log};
+\node [force, above=1cm of input] (sensor) {\\\hfill\\Semantic\\SDR Sensor\\\hfill\\};
+\node [force, above=1cm of sensor] (TM) {\\\hfill\\\hfill\\1 Layer\\Temporal Memory\\\hfill\\\hfill\\};
+\node [force, above=1cm of TM] (Prediction) {Next\\Predicted SDR};
+\node [force, above=1cm of Prediction] (Decoder) {\\\hfill\\Semantic\\SDR Decoder\\\hfill\\};
+\node [force, above=1cm of Decoder] (Output) {Next\\Predicted Word};
+
+
+
+% Draw the links between forces
+\path[->,thick] 
+(input) edge (sensor)
+(sensor) edge (TM)
+(TM) edge (Prediction)
+(Prediction) edge (Decoder)
+(Decoder) edge (Output);
+
+
+\end{tikzpicture} 

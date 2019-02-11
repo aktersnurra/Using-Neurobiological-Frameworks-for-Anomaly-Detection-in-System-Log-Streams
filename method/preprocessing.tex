@@ -1,0 +1,136 @@
+\section{Preprocessing}
+As with any textual data used for machine learning tasks, a preprocessing step of the system logs is necessary to remove numbers, special characters, and nonessential words. In this preprocessing step a corpus of the entire system log is also created. This is done in order to transform each word into a vector with the \textit{Global Vectors for Word Representation} (GloVe) algorithm. 
+
+
+\subsection{Data set}
+The data set consists of thirteen different classes of faults extracted from Ericsson's \textit{Component Based Architecture} (CBA) applications. The system logs was labeled by technicians in trouble reports. The classes together with number of examples are shown in \autoref{table:dataset}. The data set contains $14459$ unique logged events with varying length, from 4 to 206 tokens long. However, the data set is also heavily skewed, with $95.2 \%$ of all logged events being labeled as \textit{NoFault}. Some fault classes either had one example or contained single lines of system logs.
+
+
+
+\begin{table}
+\centering
+\caption{The System log Data Set}
+\label{table:dataset}
+\begin{tabularx}{10cm}{p{5.5cm} c}
+\toprule
+Fault Class     & Number of examples \\ 
+\midrule
+         CDIA  & 9\\
+         COM  & 5\\
+         CoreMW  & 74\\
+         CoreMWBRF  & 15\\
+         EVIP  & 16\\
+         JavaOAM  & 8\\
+         LDE  & 37\\
+         LM  & 6\\
+         NoFault  & 14251\\
+         SEC  & 9\\
+         SS7CAF  & 2\\
+         Trace  & 10\\  
+         VDicosee  & 17\\
+ 
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+
+Each log is structured in a similar way; date, place of recording, component, and description. An example of a \textit{CoreMW} fault from the data set is:
+
+\begin{figure}[H]
+    \centering
+        \begin{verbatim}
+         
+        Jul 27 00:18:10 PL-12 osafamfwd[8370]: Rebooting 
+        OpenSAF NodeId = 0 EE Name = No EE Mapped,Reason:
+        AMF unexpectedly crashed, OwnNodeId = 134159, 
+        SupervisionTime = 60
+    
+        \end{verbatim}
+    \caption{An example of a sytem log of a CoreMW fault.}
+    \label{fig:syslog}
+\end{figure}
+
+
+
+The logs contain unnecessary specifics, such as time stamp and unique ID, that do not contain any information in order to classify a log for a general case. Therefore, a feature extraction where only the most general and essential tokens are kept.
+
+
+\subsection{Feature Extraction}
+In the feature extraction we remove any form of digits, special characters, and memory addresses. The logs are then transformed to only contain lowercase characters as this improves the robustness and generality. Thus, the original \textit{CoreMW} log is transformed into the following processed log:
+
+
+\begin{figure}[H]
+    \centering
+    \begin{verbatim}
+        pl osafamfwd rebooting opensaf nodeid name 
+        no mapped reason amf unexpectedly crashed
+        ownnodeid supervisiontime
+    \end{verbatim}
+    \caption{Example of a processed log from \autoref{fig:syslog}.}
+    \label{fig:prosyslog}
+\end{figure}
+
+
+To be able to train and later test the HTM network, the fault label is appended to the end of each log, thus creating the modified processed log on the following form:
+
+
+\begin{figure}[H]
+    \centering
+    \begin{verbatim}
+        pl osafamfwd rebooting opensaf nodeid name
+        no mapped reason amf unexpectedly crashed 
+        ownnodeid supervisiontime coremw
+    \end{verbatim}
+    \caption{Example of a labeled system log from \autoref{fig:prosyslog}, with the fault label appended in the end of the log.}
+    \label{fig:labelsyslog}
+\end{figure}
+
+
+After this step, the labeled log is appended in a corpus containing all the logs of the data set. This step is necessary as we have to create a word vector space of the words in the logs with the GloVe algorithm. As we need to transform each word to a numerical vector. A pretrained vector space model is not possible for this use case, as the logs contain acronyms that only exist within the data set. Each labeled log is stored for future use in training and testing.
+
+\subsection{Words to Vectors}
+To transform each word into a unique vector representation, the GloVe algorithm is trained on the corpus of all log entries. The GloVe algorithm creates a word vector representation of each word. The model parameter of the GloVe algorithms are shown in \autoref{tab:GloVe}.
+
+
+\begin{table}[H]
+\centering
+\caption{GloVe parameters used to train the word vector space model. The parameters with bold font indicate use case specific values.}
+\label{tab:GloVe}
+\begin{tabularx}{10cm}{p{7cm} c}
+\toprule
+Parameter & Value\\
+\midrule
+        VOCAB\_MIN\_COUNT & 5\\
+        \textbf{VECTOR\_SIZE} & \textbf{256}\\
+        \textbf{MAX\_ITER} & \textbf{30}\\
+        \textbf{WINDOW\_SIZE} & \textbf{10}\\
+        BINARY & 2\\
+        NUM\_THREADS & 8\\
+        X\_MAX & 10\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+The parameters in bold font in \autoref{tab:GloVe} indicate values specified for the current use case, other parameters kept their original value. The \textit{VOCAB\_MIN\_COUNT} represents the minimum number of words that are contained in a corpus. The vector size was increased so that the word vector dimension would be greater. This parameter represents the value of the dimension $n$ for word vectors described in \autoref{sec:wordvec}. The dimension was increased as the SDR has to be sparse and preferably of a larger dimension, e.g. 1024 or 2048 \cite{DBLP:journals/corr/Purdy16}. However, as Wang et al. \cite{7844355} showed promising results with one-shot text generation with an HTM network using vector dimension of $50$ and $200$, a suitable choice of a vector dimension of $256$ was selected. To reduce the encoding error of the GloVe algorithm \textit{MAX\_ITER} was increased to a larger value. This parameter set the number of iteration that the adaptive gradient algorithm is executed in order to minimise the cost function. The window size is the size of the co-occurrence matrix $\boldsymbol{X}$ described in \autoref{sec:notation}. It was adjusted to match the average length of the system logs, i.e. $9.5$. The possible number of CPU threads used by the GloVe algorithm during training is given by \textit{NUM\_THREADS}. Finally, we have \textit{X\_MAX} which is the parameter $x_{max}$ defined in \autoref{eq:xmax}, that acts as a cut-off where the weighting function is assigned the value of $1$.
+
+
+\subsection{Semantic Sparse Distributed Representation}
+For an HTM network to be able to learn the patterns and temporal changes of the SDRs, each bit has to have a unique meaning. This means that the semantic meaning of each word has to be represented by some active bits. The semantic meaning is encoded by the GloVe algorithm, which transforms each word into a numerical vector. The binary representation of the numerical vector is given by computing the bit score vector defined in \autoref{eq:bitscore}. With the bit score vector, the SDR encoding is obtained by applying the encoding function, \autoref{eq:encode}, on each bit score vector. Thus, we have an SDR matrix, $\boldsymbol{X}$, where the $i$'th word vector is represented by $\boldsymbol{X}_i$. 
+
+Using experimental analysis it was determined that a sparseness of $2\%$ was deemed too sparse for the temporal memory to learn the input patterns. An increase to $8\%$ was made and satisfactory behaviour of the temporal memory was observed. The parameters used for the encoding of the word SDRs are presented in \autoref{tab:SDR}
+
+
+\begin{table}[H]
+\centering
+\caption{Word SDR parameters.}
+\label{tab:SDR}
+\begin{tabularx}{10cm}{c c c}
+\toprule
+Length & \hspace{2.1cm} ON bits & \hspace{2.1cm} Sparseness\\
+\midrule
+        256 & \hspace{2.1cm} 21 & \hspace{2.1cm} 8.2\%\\
+\bottomrule
+\end{tabularx}
+\end{table}

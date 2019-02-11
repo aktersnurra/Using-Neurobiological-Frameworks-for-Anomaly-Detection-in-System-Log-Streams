@@ -1,0 +1,6 @@
+\chapter{The Path to Semantic Understanding}
+\label{chp_nlp}
+In this chapter we will describe how we encode words into \textit{Sparse Distributed Representation} (SDR). To encode words into SDRs, each bit has to have a unique semantic meaning. To achieve this, we will first transform each word into a numerical vector via the \textit{Global Vectors for Word Representation}, or GloVe, algorithm. Next, each numerical vector is transformed into a binary vector, or SDR, where only the most important elements are converted into ON-bits. Finally, we explain the decoding algorithm for word SDRs to recall the word it encodes. 
+
+
+\input{background/NLP/glove.tex}

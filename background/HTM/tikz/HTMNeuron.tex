@@ -1,0 +1,140 @@
+\def\stepSym#1{
+\begin{scope}[shift={#1}, scale=0.3]
+    \coordinate (Aa) at (0,0) {};
+    \coordinate (Bba) at (2.22,0) {};
+    \coordinate (Bb) at (2,0) {};
+    \coordinate (Cc) at (2,2) {};
+    \coordinate (Ccd) at (1.78,2) {};
+    \coordinate (Dd) at (4,2) {};
+
+    \draw (Aa) -- (Bba);
+    \draw(Bb) -- (Cc);
+    \draw (Ccd) -- (Dd);
+    \draw[thick] (2,1) circle (4cm);
+\end{scope}
+}
+
+
+\def\slopeSym#1{
+\begin{scope}[shift={#1}, scale=0.3]
+    \coordinate (Aaa) at (0,0) {};
+    \coordinate (Bbb) at (3,3) {};
+
+    \draw (Aaa) -- (Bbb);
+    \draw[thick] (1.5,1.5) circle (4cm);
+\end{scope}
+}
+
+
+\begin{tikzpicture}[thick,scale=0.15, every node/.style={scale=.9}
+    init/.style={
+      draw,
+      circle,
+      inner sep=2pt,
+      font=\Huge,
+      join = by -latex
+    },
+    squa/.style={
+      draw,
+      inner sep=2pt,
+      font=\Large,
+      join = by -latex
+    },
+    start chain=2,node distance=13mm
+    ]
+
+
+
+%==============================
+%PYRAMID
+%==============================
+
+\coordinate (A) at (-5,0) {};
+\coordinate (B) at ( 5,0) {};
+\coordinate (C) at (0,7) {};
+\coordinate (D) at (0,35) {};
+\coordinate (E) at (2.5,3.5) {};
+
+\filldraw[draw=gray, thick,fill=gray!50] (A) -- (B) -- (C) -- cycle ;
+\draw (A) -- (C);
+\draw(B) -- (C);
+\draw (A) -- (B);
+
+%OR GATES
+\node[or gate US, draw, rotate=180,logic gate inputs=nnnnn, scale=.6] at (15, 35) (or1) {};
+
+\node[or gate US, draw, rotate=180,logic gate inputs=nnnnn, scale=.6] at (15, 13) (or2) {};
+
+\stepSym{(25, 39)}
+
+\stepSym{(25, 35)}
+
+\stepSym{(25, 31)}
+
+
+
+
+\stepSym{(25, 19)}
+
+\stepSym{(25, 16)}
+
+\stepSym{(25, 13)}
+
+\stepSym{(25, 10)}
+
+\stepSym{(25, 7)}
+
+\slopeSym{(15,0)}
+
+%INPUT
+\draw (or1.output) -- (D);
+\draw[-latex] (D) -- (C);
+
+\draw[-latex] (or2.output) -- ([xshift=-1cm]or2.output) |- (E);
+
+
+
+\draw (43, 0.4) -- node[below]{\tiny $\circ \circ  \bullet \circ \circ \circ \bullet \circ \circ \circ \circ \circ \bullet \bullet \circ$} (16.7, 0.4);
+\draw[-latex] (14.2, 0.4) -- (10, 0.4) |- (3.5, 2.1);
+
+
+\draw (26.8, 39.3) -- node[below]{\tiny $\bullet \circ \bullet \bullet \circ \circ \bullet \circ \bullet \circ \bullet$} (43, 39.3);
+\draw (26.8, 35.3) -- node[below]{\tiny $\bullet \bullet \circ \circ \bullet \circ \bullet \bullet \circ \circ \bullet$} (43, 35.3);
+\draw (26.8, 31.3) -- node[below]{\tiny  $\circ \bullet \circ \bullet \circ \bullet \circ \bullet \bullet \circ \bullet$} (43, 31.3);
+
+
+\draw (26.8, 19.3) -- node[below]{\tiny $\bullet \bullet \circ \bullet \bullet \circ \bullet \bullet \bullet \circ \bullet$} (43, 19.3);
+\draw (26.8, 16.3) -- node[below]{\tiny $\bullet \circ \bullet \bullet \bullet \circ \bullet \circ \bullet \bullet \bullet$} (43, 16.3);
+\draw (26.8, 13.3) -- node[below]{\tiny $\bullet \bullet \circ \circ \bullet \circ \bullet \bullet \circ \circ \bullet$} (43, 13.3);
+\draw (26.8, 10.3) -- node[below]{\tiny $\circ \bullet \bullet \bullet \circ \bullet \bullet \bullet \bullet \circ \bullet$} (43, 10.3);
+\draw (26.8, 7.3) -- node[below]{\tiny  $\bullet \circ \circ \bullet \bullet \circ \bullet \bullet \circ \circ \bullet$} (43, 7.3);
+
+\draw (24.4, 39.3) -- (or1);
+\draw (24.4, 35.3) -- (or1);
+\draw (24.4, 31.3) -- (or1);
+
+\draw (24.4, 19.3) -- (or2);
+\draw (24.4, 16.3) -- (or2);
+\draw (24.4, 13.3) -- (or2);
+\draw (24.4, 10.3) -- (or2);
+\draw (24.4, 7.3) -- (or2);
+
+%OUTPUT
+\draw[-latex] (0,0) -- (0, -10);
+
+\node[text width=3cm] (feedback) at (38,50)
+    {Feedback};
+
+\draw[-latex] (33.5, 48) -- (33.5, 41);
+
+\node[text width=3cm] (context) at (62, 13.2)
+    {Context};
+
+\draw[-latex] (51, 13.2) -- (44, 13.2);
+
+\node[text width=3cm] (feedforward) at (34, -10)
+    {Feedforward};
+    \draw[-latex] (30, -8) -- (30, -2);
+
+
+\end{tikzpicture}

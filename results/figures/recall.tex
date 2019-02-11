@@ -1,0 +1,34 @@
+    \begin{tikzpicture}[font=\Large]
+    \begin{axis}[
+      width=\textwidth,
+      ybar,
+      font=\Large,
+      bar width=20pt,
+      xlabel={Fault},
+      ylabel={Recall},
+      xticklabel style={rotate=45,anchor=base,yshift=-20,xshift=-22},
+      xtick=data,
+      ymin=0.400,
+      ymax=1.00,
+      axis x line=bottom,
+      axis y line=left,
+      enlarge x limits=0.1,
+      enlargelimits=0.05,
+      domain=0.40:1.000,
+              y tick label style={
+            /pgf/number format/.cd,
+            fixed,
+            zerofill,
+            precision=3,
+            /tikz/.cd,},
+      symbolic x coords={cdia,com,coremw,coremwbrf,evip,javaoam,lde,lm,nofault,sec,ss7caf,trace,vdicosee},
+      nodes near coords={\pgfmathprintnumber[fixed zerofill, precision=5]{\pgfplotspointmeta}},
+      every node near coord/.append style={color=black, rotate=67.5, anchor=center, font=\large, xshift=22, yshift=7}],
+
+    ]
+      \addplot[fill=black!30] coordinates {
+        (cdia,0.778) (com,0.6) 
+		(coremw,.797) (coremwbrf,0.775) (evip,0.875) (javaoam, 0.875) (lde, 0.892) (lm, 0.667) (nofault,0.989) (sec, 0.444) (ss7caf, 1.0) (trace, 0.9) (vdicosee,0.764)
+      };
+    \end{axis}
+  \end{tikzpicture}

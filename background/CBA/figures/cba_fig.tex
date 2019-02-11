@@ -1,0 +1,29 @@
+\begin{tikzpicture}
+
+
+\draw [rounded corners=1cm,ultra thick] (0,0) rectangle ++(7,4) node [midway] {\Large\textbf{Component 1}};
+
+\draw [dashed] (1,-1) rectangle ++(2.5,1) node [midway] {Interface 1};
+
+\draw [dashed] (3.5,-1) rectangle ++(2.5,1) node [midway] {Interface 2};
+
+\draw [rounded corners=1cm,ultra thick] (-7,-10) rectangle ++(7,4) node [midway] {\Large\textbf{Component 2}};
+
+\draw [dashed] (-4.75,-6) rectangle ++(2.5,1) node [midway] {Interface 1};
+
+\draw[-latex,thick] (-3.5,-5) to[bend right=10] (2.25,-1);
+
+\draw[-latex,thick] (2.05,-1) to[bend right=10] (-3.7,-5);
+
+%\draw[latex'-latex',ultra thick](-4,-5) to (2.25,-1);
+
+\draw [rounded corners=1cm,ultra thick] (7,-10) rectangle ++(7,4) node [midway] {\Large\textbf{Component 3}};
+
+\draw [dashed] (9.25,-6) rectangle ++(2.5,1) node [midway] {Interface 1};
+
+\draw[-latex,thick] (10.6,-5) to[bend right=10] (4.8,-1);
+
+\draw[-latex,thick] (4.5,-1) to[bend right=10] (10.4,-5);
+
+
+\end{tikzpicture}

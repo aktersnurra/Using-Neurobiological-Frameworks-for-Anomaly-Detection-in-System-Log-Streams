@@ -1,0 +1,92 @@
+\chapter{Discussion and Conclusion}
+\label{chp_disc}
+In this chapter we discuss and summarise the results obtained and presented in the previous chapter. We start off with explaining why we used the entire dataset for training and testing. Then, we discuss the results and the evaluation. Next, we discuss the model and the design choices made. Finally, we give a conclusion of this work, future improvements, and ethics. 
+
+
+\section{Discussion}
+The main objective of this thesis was to create and compare an \textit{Hierarchical Temporal Memory} (HTM) model with the existing system called \textit{Linnaeus}, in order to evaluate if the HTM algorithm is a suitable choice for anomaly detection of system logs. First, we discuss the results presented in \autoref{chp_res}. Then we will go over the choice of method where we discuss the data and the HTM model. An important note to make before we start the evaluation, is to state that the HTM model was trained and tested on the entire data set. The choice for this will be discussed further under the \textit{Data} subsection.  
+
+\subsection{Data}
+The data set contained a set of examples of system logs classified by a technician to be the reason for causing a specific fault. During the thesis there was no possibility of expanding this data set with more examples. To manually go through unlabelled data sets would require domain expertise. 
+
+Due to the fact that the HTM model was evaluated on the data set that it was trained on. It is important to state the reason why before we start discussing the performance of the algorithm. The decision not to split the data set into a training and testing set was made for the following reasons:
+
+\begin{itemize}
+    
+    \item The data set was heavily skewed, where 95.2\% of 14459 labeled examples belonged to the \textit{NoFault} class.
+    
+    \item For some of the classes with few examples, there was no underlying pattern, meaning that they did not use the same vocabulary. Therefore, no machine learning algorithm would be able to correctly classify the other system log while only being trained on the first example. 
+    
+\end{itemize}
+
+
+\subsection{Results}
+The results gathered to evaluated the HTM model are based on three metrics describe in \autoref{sec:metrics}. First, we used the \textit{Confusion Matrix} to visualise the performance of the classifications. Then, we presented the \textit{Recall} and \textit{Accuracy} for each experiment.
+
+
+During the first experiment we did not alter the system logs in any way. The performance of the HTM model is rather impressive even though it is tested on the training set. The reason that the results show promise is that the model was trained using \textit{one-shot learning}. But it is also impressive due to the distribution of the dataset, where there is a possibility that any machine learning model would over-fit on the \textit{NoFault} class. 
+
+It would however been interesting to evaluate the system using \textit{multi-shot learning}. But as the entire dataset was used for training and testing, the risk of over-fitting would have been great. If the distribution of the samples in the dataset was different, \textit{multi-shot learning} would have been an interesting choice, where the model would be evaluated on unseen examples.
+
+
+However, with \textit{one-shot learning} the HTM model it is less likely to over fit on during training. Therefore, some conclusions can be drawn from the results gathered. As we see in \autoref{fig:confmatrix}, the diagonal is prominent for the first experiment, meaning that the model is able to make correct predictions most of the time. If we then move on to study the recall and accuracy figures, shown in \autoref{fig:recall} and \autoref{fig:acc} respectively, we see that the model had an overall satisfactory performance, meaning that it had over $70\%$ recall on most classes. The accuracy throughout all experiments does not tell us a whole lot about the performance of the model. The reason for this is that this metric is saturated by the sheer size of \textit{True Negatives} for all classes except the \textit{NoFault} class.
+
+
+The trend of decay in performance is present in both of the following experiments when errors in the sequences are introduced. Which is a likely scenario if new words are introduced by a developer. A reason for this poor performance has to due with how the HTM algorithm learns sequences. Much like the a human with reading comprehension can recite the alphabet forward, every thing is done in sequence of sequences, e.g. \textit{''abcd''} then \textit{''efg''}. But if a human asked to change something in this learnt sequence before reciting it, e.g. reciting the alphabet backwards, he will find it impossible to do, unless he knows it beforehand. This is because the brain and the HTM algorithm learns forward sequence of sequences \cite{Kurzweil:2013:CMS:2534455, 10.3389/fncir.2016.00023}. When a sequence with drop-out is presented to the HTM algorithm, the columns will be \textit{bursting} due to the unpredicted input pattern, which will have consequences on future predictions.  
+
+
+\subsubsection{Evaluation}
+The evaluation is not obvious to make based on the acquired results. This is mainly due to the fact that the accuracy is not a good metric on a data set with an uneven distribution between the classes. This is due the fact that the size of the \textit{True Negative} population will saturate the accuracy for the classes with few examples. To quantify the performance of the two models, access to real test logs files would almost be necessary. But to do a fair comparison between the models with the statistics presented in \autoref{tab:stats}, we should use the training accuracy of the \textit{Linnaeus} model. We can then see that they are almost identical in performance. However, the results from the \textit{Linnaeus} model could be over-fitted, due to the fact that most no noise or errors, e.g. drop-out, where introduced during training or testing. The advantage of HTM model is that it used \textit{one-shot learning}, thus minimising the risk of over-fitting. However, HTM model does not optimise over a parameter space either, as it uses a Hebbian style learning, which should make it less prone to over-fitting the data in any case. 
+
+In terms of classification speed, \textit{Linnaeus} is between 11 and 48 per cent faster. The computational time could largely be due to the fact that they where trained and tested on two different computers, \textit{Linnaeus} on a powerful desktop and the HTM model on a laptop. However, the NuPiC framework that the HTM model uses for the temporal memory algorithm does not support multi-core processing. So the speed-up would be somewhat limited. With this said, the HTM model could be optimised by looking over parts of the code that is inefficient, e.g. the encoding and decoding function. 
+
+An obvious benefit of using a system log classifier based on the HTM algorithm is that when new system logs are introduced, retraining on the whole system log database is not needed. It would be enough to only present the new system logs to the HTM model. This is because the HTM model does not optimise weights given a certain input, as in traditional machine learning techniques. Instead, input patterns are learned via the change of permanence values in the synaptic connections of each HTM neuron. Thus, making the model robust to changes in the system logs.
+
+
+\subsection{Method}
+In this subsection we will discuss the design choices made in the implementation of the model. 
+
+\subsubsection{Model}
+There are two parts in the implementation that could be analysed; the encoding of words into Sparse Distributed Representations (SDRs), and secondly the network architecture. 
+
+The performance of the HTM model is heavily dependent on how well information is encoded into a Sparse Distributed Representations (SDRs). A drawback to our implementation is that it is hard to evaluate the GloVe encodings, as the word vector space is created by a corpus of all system logs. The system logs themselves, as shown in \autoref{fig:prosyslog}, are not structured messages in the sense that analogies that be derived from them. This could in turn mean that the GloVe encodings are sub optimal when encoding words into SDRs. This could mean that dissimilar words or acronyms are encoded as SDRs that share on bits, which could then confuse the temporal memory to confuse system log sequences. 
+
+
+Lastly, the HTM model is a one layer temporal memory with 32 cells in each of the 256 columns. The reason for limiting the network to one layer was that predictions of future inputs from this layer could be easily extracted and decoded. Reports, such as \cite{7844355}, indicates that one layered temporal memory is enough to create a state-of-the-art text generation algorithm. With more layers the size of the service size of the model would have increased, which was not inline with goal of this thesis.
+
+
+
+
+
+
+\section{Conclusion}
+The HTM model has shown promise in classification of system logs. It preforms well with limited computational resources and is able to classify system logs rather well with \textit{one-shot learning}. The author believes that a claim regarding the use of an HTM model in a production setting would be easier if a more thorough benchmark was made, e.g. system log files from real test was presented to both classifiers, and then compare metrics. But with the current knowledge, the author believes that an HTM model for this task would be preferable due to the fact that the model does not need to be retrained on the entire data set when new examples are introduced. 
+
+
+
+
+
+
+\section{Future Work}
+The first major improvement to be made would be to train the HTM model on system log sequences with different drop-out rates to see if the HTM model is able to learn to generalise. 
+
+
+The drop-out experiments tries to recreate the situation when a new word is introduced and the encoder is not able to encode it into an existing SDR. However, instead of just passing on to the next word in the sequence, it would be interesting to pass the prediction from the previous time step in as the input SDR to the network. This would prevent some columns from bursting, where all cells become active, and minimise this impact on the future prediction and the prediction of the fault class.
+
+
+The next improvement could be to change the structure of the HTM model and remove the temporal aspect of viewing the system logs, and instead use an approach similar to \textit{coritcal.io} \cite{DBLP:journals/corr/Webber15} with a semantic fingerprinting (SDR) of each system log. The semantic fingerprints would be created by, as before, first creating a unique SDR for each word. By aggregating all the SDRs of a sequence together, each index would increment for each ON bit in each SDR. To preserve the spareness of the new SDR, a threshold would be introduced to only convert the indices with the largest accumulated values into a new sparse SDR, while the indices below the threshold would be converted to OFF bits. These semantic fingerprints would then be presented to a spatial pooler, which is a temporal memory without the temporal aspect taken into account. The advantage of this approach would be that the noise tolerance of the HTM theory could be used to its fullest potential, as noise of up till 50 per cent in an input SDR can be handled by an spatial pooler or temporal memory \cite{10.3389/fncir.2016.00023}. 
+
+
+Another interesting approach would be to find patterns of conditional probabilities between logged events, in order to find faults in system log files. This task could be suitable for an HTM algorithm due to the sequential nature of this task.
+
+
+A final interesting improvement would be to translate all the Ericsson acronyms into English words. This would then mean that a GloVe model would not be needed to be retrained when new ones appear. We might then be able to use a pretrained GloVe model on the first 6 billion tokes on English Wikipedia.  
+
+
+
+
+\section{Ethics}
+The ethical aspects of this thesis and the proposed implementation does not in its current form present much of an ethical issue. This is largely because this model is contained to only analyse system logs gathered in testing. Therefore, the impact of its use is limited, as it will not impact a product providing a service to Ericsson's customers. The intent of this system is not to replace anyone, as this will only be a tool in which a technician could rely on when doing troubleshoots and classifying system log files correctly. And if the system did not perform well enough to reliably help a technician, the system would not be used. 
+
+
+The ethical aspect could instead be discussed on the topic of machine learning at large. Where there are numerous ethical issues that could arise when implementing machine learning software. From use in autonomous cars to weapon systems. But as these subjects are not part of this thesis we will not dwell further into these never ending philosophical debates. 

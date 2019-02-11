@@ -1,0 +1,173 @@
+ %%
+%% This is file `kth-ex1.tex',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% kthesis.dtx  (with options: `ex1')
+%% 
+%% IMPORTANT NOTICE:
+%% 
+%% For the copyright see the source file.
+%% 
+%% Any modified versions of this file must be renamed
+%% with new filenames distinct from kth-ex1.tex.
+%% 
+%% For distribution of the original source see the terms
+%% for copying and modification in the file kthesis.dtx.
+%% 
+%% This generated file may be distributed as long as the
+%% original source files, as listed above, are part of the
+%% same distribution. (The sources need not necessarily be
+%% in the same archive or directory.)
+\documentclass[ebook,11pt,exjobb]{kth-mag}
+\usepackage[T1]{fontenc}
+\usepackage{textcomp}
+\usepackage{lmodern}
+\usepackage[utf8]{inputenc}
+\usepackage[english,swedish]{babel}
+\usepackage{modifications}
+\usepackage{csquotes}
+\usepackage{float}
+\usepackage{csquotes}
+\usepackage[export]{adjustbox}
+\usepackage{acronym}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usepackage{float}
+\usepackage{pgffor}
+\usetikzlibrary{shadows}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{relsize}%
+\usepackage[final]{pdfpages}
+\usepackage{multicol}
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+\usepackage{enumitem}
+\usepackage{tabularx,booktabs}
+\usetikzlibrary{matrix,chains,positioning,decorations.pathreplacing,arrows,shapes.gates.logic.US,shapes.gates.logic.IEC,calc,3d,shapes.geometric}
+\usepackage[
+backend=biber,
+style=ieee,
+citestyle=ieee 
+]{biblatex}
+
+\usepackage{rotating}
+\usepackage{makecell, multirow}
+\renewcommand\theadfont{\normalsize}
+\renewcommand\theadgape{}
+
+\newcolumntype{C}{>{\centering\arraybackslash}X} % centered version of "X" type
+\setlength{\extrarowheight}{1pt}
+
+\pgfmathdeclarerandomlist{MyRandomColors}{%
+    {white}%
+    {white}%    
+    {white}%
+    {white}%
+    {white}%
+    {white}%
+    {white}%
+    {white}%
+    {black}%
+    {white}%
+    {white}%
+    {white}%
+    {white}%
+    {black}%
+    {white}%
+    {white}%
+    {white}%
+}%
+
+\newcommand*{\GridSize}{35}
+
+\newcommand*{\ColorCells}{%
+    \foreach \y in {1,...,\GridSize} {
+        \foreach \x in {1,...,\GridSize} {
+            \pgfmathrandomitem{\RandomColor}{MyRandomColors} 
+            \draw [fill=\RandomColor, draw=none, ultra thick] 
+                (\x-1,\y-1) rectangle (\x,\y);
+        }%
+    }%
+}%
+
+\listfiles
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+
+
+\title{Using Neurobiological Frameworks for Anomaly Detection in System Log Streams}
+\foreigntitle{Anomali Detektion i System Loggar med Hjälp av Neurobiologiskt Ramverk}
+\author{Gustaf Rydholm}
+\date{2018}
+\blurb{\hfill\\\hfill\\\hfill\\\hfill\\\hfill\\\hfill\\Examiner: Joakim Jaldén\\Academic Supervisor: Arun Venkitaraman\\Industrial Supervisor at Ericsson: Armin Catovic\\\hfill\\Master's Thesis in Signal Processing\\School of Electrical Engineering and Computer Science\\Royal Institute of Technology, SE-100 44 Stockholm, Sweden\\Stockholm, Sweden 2018}
+\trita{}%TRITA-EE-EX-2018:nn
+
+
+
+
+\addbibresource{references/ref.bib}
+
+\begin{document}
+
+
+\includepdf[fitpaper=true, pages={1}]{FrontAndBackPage/neurobio.pdf}
+\clearpage\thispagestyle{empty}\mbox{}\clearpage
+\maketitle
+\selectlanguage{english}
+\frontmatter
+\pagestyle{empty}
+
+%\removepagenumbers
+
+\input{abstract/abstract}
+\clearpage
+
+\input{abstract/referat.tex}
+\clearpage
+
+\input{acknowledgement/acknowledgement.tex}
+\clearpage
+
+
+
+\tableofcontents*
+
+\clearpage
+\listoffigures
+\clearpage
+\listoftables
+\clearpage
+
+\input{abbreviations/abbreviations}
+
+\mainmatter
+%INTRODUCTION
+\input{introduction/introduction}
+%BACKGROUND
+\input{background/background}
+%METHOD
+\input{method/method.tex}
+%RESULTS
+\input{results/results}
+%DISCUSSION AND CONCLUSION
+\input{discussion-and-conclusion/discussion-and-conclusion.tex}
+
+
+\newpage
+\printbibliography
+
+\newpage
+\appendix
+\input{appendix/neuroscience/neurosci.tex}
+\newpage
+
+\includepdf[fitpaper=true, pages={2}]{FrontAndBackPage/neurobio.pdf}
+\end{document}
+\endinput
+%%
+%% End of file `kth-ex1.tex'.

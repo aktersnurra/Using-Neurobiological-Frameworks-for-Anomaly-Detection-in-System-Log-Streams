@@ -1,0 +1,176 @@
+%The Glove algorithm is chosen as to produce state-of-the-art results, $75\%$ accuracy, on a word analogy dataset  \cite{pennington2014glove}.
+
+
+\section{Global Vectors for Word Representation}
+Unlike most semantic vector space models, which are evaluated based on a distance metric, such as distance or angle, the GloVe algorithm tries to capture the finer structures of differences in the word vectors with distributed representation and multi-clustering, and thus capturing analogies \cite{pennington2014glove}. This means that \textit{''king is to queen as man is to woman''} is encoded as the vector equation $king - queen = man - woman$ in the word vector space \cite{pennington2014glove}. This is possible as the GloVe algorithm creates linear directions of meaning with a global log-bilinear regression model \cite{pennington2014glove}.
+
+
+\label{sec:GloVe}
+\subsection{Notation}
+\label{sec:notation}
+GloVe is an unsupervised learning algorithm that looks at the co-occurrence of words of a global corpus to obtain statistics for each word, and thus create a vector representation of each word \cite{pennington2014glove}. The word-by-word co-occurrence is represented by the matrix $\boldsymbol{X}$, which entries, $x_{ij}$, are the number of occurrence of $i$ word in the context of word $j$ \cite{pennington2014glove}. Next, we have the total number of times any word is present in the context of word $i$, defined as $x_i = \sum_k x_{ik}$. Finally, the probability of word $j$ appearing in the context of word $i$, $P_{ij} = P(j|i)= x_{ij} / x_{i}$.
+
+\subsection{Word to Vector Model}
+\label{sec:wordvec}
+To distinguish between relevant and irrelevant words, and discriminate between relevant word, Pennington et al. \cite{pennington2014glove} found that using a ratio between co-occurrence probabilities was a better option. Thus, formalising the general objective function as:
+
+
+\begin{equation}
+    F(\boldsymbol{w}_i, \boldsymbol{w}_j, \boldsymbol{\tilde{w}}_k) = \frac{P_{ik}}{P_{jk}}
+    \label{eq:objective}
+\end{equation}
+
+
+\noindent where the ratio depends on three words; $i$,$j$, and $k$. Each word is represented as a word vector $\boldsymbol{w}\ \in\ \mathbb{R}^n$, and $\boldsymbol{\tilde{w}}\ \in\ \mathbb{R}^n$ is separate context vector. By modifying \autoref{eq:objective} with consideration to the linear structure of the vector space together with symmetrical properties, Pennington et al. \cite{pennington2014glove} is able to find a drastically simplified solution on the form:
+
+\begin{equation}
+    \boldsymbol{w}^{\top}_{i}\tilde{\boldsymbol{w}}_k + b_i + \tilde{b}_k = \log(x_{ik})
+    \label{eq:bilinear}
+\end{equation}
+
+\noindent Where the bias terms $b_i$ and $\tilde{b}_k$ takes care of symmetry issues in $x_i$ and $\tilde{x}_k$ respectively \cite{pennington2014glove}. However, \autoref{eq:bilinear} is ill-defined as it diverges if the logarithms argument is zero. Another problem is that it weights all co-occurrences equally. Therefore, a weighted least squares regression model is proposed to solve this \cite{pennington2014glove}. By introducing a weighting function $f(x_{ij})$ the following cost function is introduced:
+
+\begin{equation}
+    J = \sum^{V}_{i,j=1}f(x_{ij})\Big( \boldsymbol{w}^{\top}_i\tilde{\boldsymbol{w}}_j + b_i + \tilde{b}_j - \log(x_{ij}) \Big)^2
+\end{equation}
+
+where the vocabulary size is given by $V$. To address the problems that the weighting function needs to solve, the following criteria are put on the weighting function:
+
+\begin{enumerate}[label=\roman*.,leftmargin=4em,align=left]
+    \item First, $f(x)$ should be a continuous function where $f(0) = 0$. It should also fulfil that $\lim\limits_{x \to 0} f(x)\log^2(x)$ is finite.
+    
+    \item $f(x)$ must be a monotonically increasing function, as rare co-occurrences are weighted as less important.
+    
+    \item To not overweight frequent co-occurrences, i.e. for large values of $x$, $f(x)$ should be relatively small. 
+    
+\end{enumerate}
+
+With these requirements, Pennington et al. \cite{pennington2014glove} finds that a suitable weight function is given by:
+
+
+\begin{equation}
+    \label{eq:xmax}
+    f(x) = 
+        \begin{cases}
+            (x/x_{max})^{\alpha},&\text{if } x\ <\ x_{max}\\
+            1,&\text{otherwise}
+        \end{cases}
+\end{equation}
+
+Where empirical results shows that $\alpha = 3/4$ gives a modest improvement over the linear choice of $\alpha = 1$ \cite{pennington2014glove}. The parameter $x_{max}$ acts as a cut-off, where the weighting function is assigned to $1$ for word-word co-occurrences $x$ greater than $x_{max}$.
+
+\subsection{Training}
+The GloVe algorithm is trained on a corpus using \textit{adaptive gradient algorithm} to minimise the cost function. GloVe generates two sets of word vectors, $\boldsymbol{W}^{\prime}$ and $\boldsymbol{\tilde{W}}$. If $\boldsymbol{X}$ is symmetrical, $\boldsymbol{W}^{\prime}$ and $\boldsymbol{\tilde{W}}$ only differ due to the randomisation of the initialisation \cite{pennington2014glove}. As explained by Pennington et al. \cite{pennington2014glove}, a small boost in performance is typically gained by summating the two word vector sets. Thus, the word vector space generated is defined as $\boldsymbol{W} = \boldsymbol{W}^{\prime} + \boldsymbol{\tilde{W}}$.
+
+
+
+
+\section{Semantic Sparse Distributed Representation}
+\label{sec:SDRencode}
+For a \textit{Hierarchical Temporal Memory} (HTM) to be able to learn input patterns, each bit of the feedforward receptive field has to encode some unique meaning. In this case, each bit of the SDRs has to encode some unique semantic meaning. The semantic SDR encoder that we will explain was developed by Wang et al. \cite{7844355} to convert numerical GloVe vectors into SDR while minimising the semantic loss of the encoding.
+
+
+
+\subsection{Encoding}
+With word vector matrix $\boldsymbol{W}$ generated by the GloVe algorithm in \autoref{sec:GloVe}, all words in the corpus now has a unique $n$-dimensional semantic vector representation. 
+
+
+\begin{equation}
+    \boldsymbol{W} = \begin{pmatrix}
+        \boldsymbol{w}_{1}\\
+        \boldsymbol{w}_{2}\\
+        \vdots\\
+        \boldsymbol{w}_{V}
+    \end{pmatrix} = \begin{pmatrix}
+        w_{11}&w_{12}&\cdots &w_{1n} \\
+        w_{21}&w_{22}&\cdots &w_{2n} \\
+        \vdots & \vdots & \ddots & \vdots\\
+        w_{v1}&w_{v2}&\cdots &w_{Vn}
+    \end{pmatrix}
+\end{equation}
+
+
+\noindent However, these are numerical vectors and therefore needs to be converted into binary vectors. As only $k$, where $k \ll n$, elements will be converted into ON bits, we need to be able to find the most semantically important elements of each word vector in order to minimize the semantic loss in the SDR encoding.
+
+
+We start by introducing what Wang et al. \cite{7844355} calls the \textit{Bit Importance} metric. This is a scaling operation of each column in the word vector matrix, $\boldsymbol{W}$, defined as:
+
+
+\begin{equation}
+    \psi(w_{ib}) = w_{ib}\Bigg( \sum\limits_{j=1}^{V} w_{jb} \Bigg)^{-1}
+\end{equation}
+
+
+\noindent where $b$ is seen as the current bit in the SDR encoding and is defined on the range $b \in \{1,\ 2,...,\ n\}$, and $V$ is the size of the vocabulary of the corpus, i.e. number of word vectors in $\boldsymbol{W}$. This gives a metric of the importance of each element in a word vector. Next, we introduce the \textit{Bit Discrimination} metric, which is a feature standardisation of each word:
+
+
+\begin{equation}
+    \phi(w_{ib}) = \Bigg| \frac{w_{ib} - \mu_b}{\sigma_b} \Bigg|
+    \label{eq:BD}
+\end{equation}
+
+
+ Which means that we will have a zero-mean and unit variance. The discrimination gives a measure of how important a word vector's element is in relation to the same element in the other word vectors. The mean used in \autoref{eq:BD} is defined as:
+
+
+\begin{equation}
+    \mu_b = \frac{1}{V} \sum\limits_{j=1}^{V} w_{jb}
+\end{equation}
+
+
+where $V$ is the size of the vocabulary. The standard deviation of column in a word matrix is computed in the following way:
+
+
+\begin{equation}
+    \sigma_b = \sqrt{\frac{1}{V}\sum\limits_{j=1}^{V} ( w_{jb} - \mu_b )^2}
+\end{equation}
+
+
+\noindent With element wise multiplication of the $i$'th bit importance and discrimination vector, the $i$'th \textit{Bit Score} vector is obtained:
+
+
+\begin{equation}
+    \boldsymbol{\Gamma}_{i}(\boldsymbol{w}_{i}) = \psi(\boldsymbol{w}^{\top}_{i}) \odot \phi(\boldsymbol{w}^{\top}_{i}) = \begin{pmatrix}\psi(w_{i1})\\\psi(w_{i2})\\\vdots\\\psi(w_{in})\end{pmatrix} \odot \begin{pmatrix} \phi(w_{i1})\\\phi(w_{i2})\\\vdots\\\phi(w_{in})\end{pmatrix}
+    \label{eq:bitscore}
+\end{equation}
+
+
+where $\odot$ is the \textit{Hadamard} product. This vector contains a score of how semantically important each element in the word vector $\boldsymbol{w}_i$ is. To encode the bit score vectors to SDR, we need to find the $k$ largest values and convert them to ON-bits, while the remaining $n-k$ values are converted into OFF-bits. The set of the $k$ largest values in $\boldsymbol{\Gamma}_{i}(\boldsymbol{w}_{i})$ is defined as:
+
+
+\begin{equation}
+    \boldsymbol{\Gamma}_{i,max}(\boldsymbol{w}_{i}) = \argmax\limits_{\boldsymbol {\Gamma}_{i}^{\prime} \subset\boldsymbol {\Gamma}_{i},\ |\boldsymbol{\Gamma}_{i}^{\prime}|=k}\ \sum\limits_{\gamma \in \boldsymbol{\Gamma}_{i}^{\prime}}\gamma
+\end{equation}
+
+where $\gamma = \psi(w_{ij}) \cdot \phi(w_{ij})$. With this set of values, we now convert the $i$'th word vector $\boldsymbol{w}_{i}$ into an semantic SDR by applying the following encoding function to each element $j$:
+
+
+\begin{equation}
+    \xi_i(w_{ij}) = 
+        \begin{cases}
+            1,&\text{if } \Gamma_{i}(w_{ij})\ \in\ \boldsymbol{\Gamma}_{i,max}(\boldsymbol{w}_{i})\\
+            0,&\text{otherwise}
+        \end{cases}
+\end{equation}
+
+
+Thus, the SDR encoding $\boldsymbol{x}_{i}$ of the $i$'th word is given by:
+
+\begin{equation}
+    \boldsymbol{X}_{i}(\boldsymbol{w}_{i}) = \xi_i(\boldsymbol{w}_{i}) = \begin{pmatrix}\xi_i(w_{i1})\\\xi_i(w_{i2})\\\vdots\\\xi_i(w_{in})\end{pmatrix}
+    \label{eq:encode}
+\end{equation}
+
+Each SDR encoding is represented in an SDR matrix, denoted as $\boldsymbol{X}=[ \boldsymbol{X}_{1}\ \boldsymbol{X}_{2}\ \cdots\ \boldsymbol{X}_{v}]^{\top}$, where the $i$'th row is the SDR encoding of the $i$'th word in word vector matrix $\boldsymbol{W}$.
+
+
+\subsection{Decoding}
+From \autoref{sec:TM} we learned that the temporal memory is able to predict future incoming pattern when some of the neurons transition into depolarised states. The incoming feedforward pattern predicted by the temporal memory is denoted by $\boldsymbol{\tilde{X}}_{t+1}$. To decode the predicted word we simply find the word SDR that share the most ON-bits with the predicted SDR.
+
+\begin{equation}
+    \tilde{w} = \argmax\limits_{i} \boldsymbol{X}_{i} \cdot \boldsymbol{\tilde{X}}_{t+1}
+    \label{eq:pred}
+\end{equation}
+
+
+\noindent where $i \in \{1, 2, \hdots, V\}$. \autoref{eq:pred} returns the index of the best matching word, thus the predicted word can be obtained by doing an index look-up. If the relevant words only belongs to a subset of the entire set of words, the argument $i$ can be changed to only contain these words. Letting the temporal memory being able to only predict fault categories is such a case.
